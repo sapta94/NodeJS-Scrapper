@@ -1,5 +1,23 @@
 const axios = require('axios')
 const htmlparser2 = require("htmlparser2");
+const mongoose = require('mongoose');
+const path = require("path");
+
+require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
+const link = require('./Models/link')
+
+
+
+
+mongoose.connect(`mongodb+srv://code-talks:${process.env.DB_PASSWORD}@cluster0.f3qmg.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`,{
+  useNewUrlParser:true
+},(err)=>{
+  if(err){
+    console.log('Some error occurerd while Connecting to DB',err)
+    return
+  }
+  console.log('Successfully Connected to DB!')
+})
 
 linkArr=[]
 const parser = new htmlparser2.Parser({
@@ -24,7 +42,17 @@ axios.get('https://medium.com').then(resp=>{
         resp.data
     );
     parser.end();
-    parseLinksandStore();
+    let linkDetails = parseLinksandStore();
+    Object.keys(linkDetails).forEach(async (item)=>{
+        let eachLink={
+            linkName:item,
+            count:linkDetails[item]['count'],
+            params:linkDetails[item]['params']
+        }
+        console.log(eachLink)
+        let linkModel = new link(eachLink)
+        await linkModel.save()
+    })
     
 }).catch(err=>{
     console.log('some error occured ',err)
