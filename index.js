@@ -1,9 +1,9 @@
-const axios = require('axios')
-const htmlparser2 = require("htmlparser2");
+
 const mongoose = require('mongoose');
 const path = require("path");
 const express = require('express')
 const app = express();
+const bodyParser = require('body-parser')
 
 require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
 const link = require('./Models/link')
@@ -28,84 +28,11 @@ const packages = {
     express,
 };
 
-function fetchLinks(url,linkDetails){
-    let linkArr=[]
+require('./routes')(packages)
 
-    const parser = new htmlparser2.Parser({
-        onopentag(name, attribs) {
-            if (name === "a") {
-                if (attribs.href.includes('medium.com/')){
-                    linkArr.push(attribs.href)
-                }
-                
-            }
-        },
-        onclosetag(tagname) {
-            if (tagname === "a") {
-                //console.log("That's it?!");
-            }
-        },
-    });
-
-    axios.get(url).then(resp=>{
-        parser.write(
-            resp.data
-        );
-        parser.end();
-        if(linkArr.length==0){
-            return linkDetails
-        }
-        linkDetails = {...linkDetails,...parseLinksandStore(linkArr)};
-        Object.keys(linkDetails).forEach(async (item,index)=>{
-            if(index<5)
-                fetchLinks(item,linkDetails)
-        })
-        // Object.keys(linkDetails).forEach(async (item)=>{
-        //     let eachLink={
-        //         linkName:item,
-        //         count:linkDetails[item]['count'],
-        //         params:linkDetails[item]['params']
-        //     }
-        //     console.log(eachLink)
-        //     let linkModel = new link(eachLink)
-        //     await linkModel.save()
-        // })
-        
-    }).catch(err=>{
-        console.log('some error occured ',err)
-        return
-    })
-}
-
-
-function parseLinksandStore(linkArr){
-    linkObj={}
-    linkArr.forEach((element,index) => {
-        let urlSplit = element.split('?')
-        let domainName = urlSplit[0]
-        if (domainName.slice(-1)=='/'){
-            domainName = domainName.substring(0,domainName.length-1)
-        }
-        let paramList = (urlSplit[1])?getParameterList(urlSplit[1]):[]
-        if(linkObj[domainName]){
-            linkObj[domainName]['count']+=1
-            linkObj[domainName]['params'].concat(paramList)
-        }else{
-            linkObj[domainName]={
-                count:1,
-                params:paramList
-            }
-        }
-    });
-    return linkObj
-}
-
-function getParameterList(url){
-    let keyValues=url.split('&')
-    let keys = keyValues.map((item)=>{
-        return item.split('=')[0]
-    })
-    return keys
-}
-
-console.log(fetchLinks('https://medium.com',{}))
+var port = process.env.PORT||5000;
+app.listen(port, () =>
+  console.log(
+    `App is now running on port ${process.env.PORT}`
+  )
+);
