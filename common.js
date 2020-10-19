@@ -1,3 +1,4 @@
+//funtion that separates the domain and parameters and sets count and param for each link
 function parseLinksandStore(linkArr){
     linkObj={}
     linkArr.forEach((element,index) => {
@@ -19,7 +20,7 @@ function parseLinksandStore(linkArr){
     });
     return linkObj
 }
-
+//function to return the parameter names from a url
 function getParameterList(url){
     let keyValues=url.split('&')
     let keys = keyValues.map((item)=>{

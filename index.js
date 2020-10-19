@@ -5,11 +5,10 @@ const express = require('express')
 const app = express();
 const bodyParser = require('body-parser')
 
-require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
-
 app.use(bodyParser.json({limit: "10mb"}));
 app.use(bodyParser.urlencoded({ extended: false }));
 
+//Connect to mongoose server
 mongoose.connect('mongodb://mongo:27017/'+process.env.CONFIG_MONGODB_ADMINDB, {
   useNewUrlParser: true,
   user: process.env.CONFIG_MONGODB_ADMINUSERNAME,
@@ -21,24 +20,18 @@ mongoose.connect('mongodb://mongo:27017/'+process.env.CONFIG_MONGODB_ADMINDB, {
   }
   console.log('Successfully Connected to DB!')
 })
-// mongoose.connect(`mongodb+srv://code-talks:${process.env.DB_PASSWORD}@cluster0.f3qmg.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`,{
-//   useNewUrlParser:true
-// },(err)=>{
-//   if(err){
-//     console.log('Some error occurerd while Connecting to DB',err)
-//     return
-//   }
-//   console.log('Successfully Connected to DB!')
-// })
 
 const packages = {
     app,
     express,
 };
 
+//import the routes and pass packages to the routes routes
 require('./routes')(packages)
 
 var port = process.env.PORT||5000;
+
+//start the server
 app.listen(port, () =>
   console.log(
     `App is now running on port ${process.env.PORT}`

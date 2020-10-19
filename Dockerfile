@@ -16,6 +16,3 @@ COPY . .
 
 # default startup command
 CMD ["npm","start"]
-
-## while doing docker run do not forget to implement port mapping 
-## (docker run -p <your_port>:<container_port> <image_id>)
