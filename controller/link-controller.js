@@ -1,6 +1,8 @@
 const common = require('../common')
 const axios = require('axios')
 const htmlparser2 = require("htmlparser2");
+const link = require('../Models/link')
+
 
 module.exports.linkCrawler = async(req,res) => {
     var url = req.body.url||null;
@@ -54,20 +56,28 @@ function fetchLinks(url,linkDetails,linkArr,res){
                 return resolve(linkDetails)
             }
             linkDetails = {...linkDetails,...common.parseLinksandStore(linkArr)};
+            let keyArr = Object.keys(linkDetails)
+            for (i in keyArr){
+                item = keyArr[i]
+                let eachLink={
+                    linkName:item,
+                    count:linkDetails[item]['count'],
+                    params:linkDetails[item]['params']
+                }
+                let linkModel = new link(eachLink)
+                try{
+                    await linkModel.save()
+                }catch(err){
+                    console.log('mongo err', err)
+                }
+                
+            }
+
             let toCrawlLinks = linkArr.slice(0,5)
             for (item in toCrawlLinks){
                 await fetchLinks(toCrawlLinks[item],linkDetails,linkArr.slice(5,linkArr.length),res)
             }
-            // Object.keys(linkDetails).forEach(async (item)=>{
-            //     let eachLink={
-            //         linkName:item,
-            //         count:linkDetails[item]['count'],
-            //         params:linkDetails[item]['params']
-            //     }
-            //     console.log(eachLink)
-            //     let linkModel = new link(eachLink)
-            //     await linkModel.save()
-            // })
+            
             
         }).catch(err=>{
             console.log('some error occured ')
