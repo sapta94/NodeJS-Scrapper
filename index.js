@@ -7,6 +7,7 @@ const bodyParser = require('body-parser')
 
 app.use(bodyParser.json({limit: "10mb"}));
 app.use(bodyParser.urlencoded({ extended: false }));
+require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
 
 //Connect to mongoose server
 mongoose.connect('mongodb://mongo:27017/'+process.env.CONFIG_MONGODB_ADMINDB, {
@@ -26,7 +27,7 @@ const packages = {
     express,
 };
 
-//import the routes and pass packages to the routes routes
+//import the routes and pass packages to the routes
 require('./routes')(packages)
 
 var port = process.env.PORT||5000;
